@@ -1,0 +1,25 @@
+actions:
+  - name: up
+    description: up docker compose dev
+    command:
+      - docker-compose up
+  - name: down
+    command:
+      - docker-compose down
+  - name: ssh
+    prefix: api
+    alias: s
+    command:
+      - docker exec -it api_container /bin/bash
+  - name: build
+    prefix: frontend
+    command:
+      - cd ./frontend
+      - npm run build
+
+prefix:
+  - name: api
+    description: demo1
+    alias: a
+  - name: frontend
+    description: demo1

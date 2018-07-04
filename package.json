@@ -1,15 +1,18 @@
 {
-  "name": "greytape",
-  "version": "0.6.0",
-  "description": "A library to create CLI tools",
-  "main": "src/index.js",
+  "name": "greytape-demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "cli.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/hellocomet/greytape.git"
-  },
-  "author": "Damien Buty",
-  "license": "MIT"
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^2.16.0",
+    "nexe": "^2.0.0-rc.30",
+    "nunjucks": "^3.1.3",
+    "read-yaml": "^1.1.0",
+    "yam": "0.0.24"
+  }
 }

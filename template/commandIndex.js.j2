@@ -1,0 +1,5 @@
+module.exports = {
+{% for name in names %}
+  {{ name }}: require('./{{ name }}'),
+{% endfor %}
+}

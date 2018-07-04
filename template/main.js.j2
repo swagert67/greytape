@@ -1,0 +1,20 @@
+#!/usr/bin/env node
+let Program = require('commander')
+let Actions = require('./actions')
+
+for (let action in Actions){
+  Actions[action](Program)
+}
+
+Program
+.description('CLI for greytape')
+.version("0.0.1")
+{% for prefix in prefixs %}
+  .command('{{ prefix.name }}', '{{ prefix.description }}').alias('{{ prefix.alias }}')
+{% endfor %}
+.parse(process.argv)
+
+
+if (Program.args.length === 0) {
+  Program.help()
+}
