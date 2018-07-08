@@ -76,8 +76,6 @@ actions:
       - cmd: node dist/stu.js
         cwd: ./{{ newDir }}/greytape
 
-
-
 prefix:
   - name: api
     description: action on api container
