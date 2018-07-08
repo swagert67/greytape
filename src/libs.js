@@ -18,8 +18,8 @@ const VALIDATION_CONFIG = {
     valid: ["name", "description", "alias"]
   },
   action: {
-    valid: ["name", "description", "alias", "prefix", "arg", "options", "register", "command", "run"],
-    require: ["name", "command", "run"],
+    valid: ["name", "description", "alias", "prefix", "arg", "options", "register", "command", "exec"],
+    require: ["name", "command", "exec"],
     interpolation: ["name", "description", "alias", "prefix", "command"]
   },
   arg: {
@@ -36,9 +36,14 @@ const VALIDATION_CONFIG = {
     valid: ["name", "command", "pwd"],
     require: ["name", "command"],
     interpolation: ["name"],
+  },
+  exec: {
+    valid: ["cmd", "cwd"],
+    require: ["cmd"],
+    interpolation: []
   }
 }
-const ACTION_SUB_BLOCK = ["arg", "options", "registers"]
+const ACTION_SUB_BLOCK = ["arg", "options", "registers", "exec"]
 
 let printError = (msg) => console.error(Chalk.red(msg))
 
@@ -327,6 +332,62 @@ let validationActionRegister = (register, actionName, index, yaml) => {
   })
 }
 
+let validationActionExec = (execs, actionName, index, yaml, runtimeVar) => {
+  if (DEBUG) console.log(`-- validationActionExec --`)
+  return new Promise((resolve, reject) => {
+    try {
+      /// test si execs est de type object
+      if (!(execs instanceof Object) || execs instanceof Array) throw(`In actions block, name:${actionName} and index:${index}, exec value must be of object type`)
+
+      let keysName = Object.keys(execs)
+
+      /// test si les cle obligatoir sont dans l'object exec
+      VALIDATION_CONFIG["exec"].require.map((keyName) => {
+        if (!keysName.includes(keyName)) throw(`In actions block > exec, name:${actionName} and index:${index}, require key:${keyName}`)
+      })
+
+      keysName.map((keyName) => {
+        /// test si la cle est dans la list valid
+        if (!VALIDATION_CONFIG["exec"].valid.includes(keyName)) throw(`In actions block > exec, name:${actionName} and index:${index}, key:${keyName} is not valid`)
+        /// test si la valeur dans la cle est vide
+        if (execs[keyName] == null) throw(`In actions block > exec, name:${actionName} and index:${index}, value of key:${keyName} is empty`)
+        /// test si la la valeur dans la cle n'est pas un string
+        if (typeof(execs[keyName]) != "string") {
+          /// test si il manque les doubles quotes pour l'interpolation
+          if (execs[keyName].hasOwnProperty("[object Object]")) throw(`In actions block > exec, name:${actionName} and index:${index}, key:${keyName} missing "" between interpolation "demo of {{ var }} spm"`)
+          throw(`In actions block > exec, name:${actionName} and index:${index}, value of key:${keyName} need to be of string type`)
+        }
+        /// test si la valeur associé a la cle contient une variable ou plus
+        if ((matches = matchesVariables(execs[keyName], REGEX_VARIABLE))) {
+          /// test si la cle est dans le tableau des interpolation
+          if (VALIDATION_CONFIG["exec"].interpolation.includes(keyName)) {
+            matches.map((match) => {
+              /// test si la variable est contenu dans env
+              if (process.env[match[1]]) {
+                execs[keyName] = replaceAt(execs[keyName], match[0], process.env[match[1]])
+              /// test si la variable est contenu dans vars block
+              } else if (yaml.vars[match[1]]) {
+                execs[keyName] = replaceAt(execs[keyName], match[0], yaml.vars[match[1]])
+              } else {
+                throw(`In actions block > exec, name:${actionName}, the key:${keyName} use a undefined variable:${match[1]}`)
+              }
+            })
+          } else {
+            matches.map((match) => {
+              /// test si la variable est contenu dans runtimeVar
+              if (!runtimeVar.includes(match[1])) throw(`In actions block > exec, name:${actionName}, the key:${keyName} use a undefined variable:${match[1]}`)
+              execs[keyName] = replaceAt(execs[keyName], match[0], "${ vars[ \"" + match[1] + "\" ] }")
+            })
+          }
+        }
+      })
+      resolve(execs)
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
+
 let validateYamlAction = (action, yaml) => {
   if (DEBUG) console.log("-- validateYamlAction --")
   return new Promise(async(resolve, reject) => {
@@ -348,8 +409,6 @@ let validateYamlAction = (action, yaml) => {
         if (!keysName.includes(keyName)) throw(`In actions block, name:${actionName}, require key:${keyName}`)
       })
 
-      //les deux et ajout les noms dans un tableau
-
       let runtimeVar = []
       if (yaml.vars) runtimeVar = [...runtimeVar, ...Object.keys(yaml.vars)]
       /// test si la cle arg exist
@@ -363,13 +422,13 @@ let validateYamlAction = (action, yaml) => {
         runtimeVar = [...runtimeVar, action.arg.name]
       }
 
-      /// test si la cle default exist
+      /// test si la cle options exist
       if (action.hasOwnProperty("options")) {
         /// test si options est vide
         if (!action.options) throw(`In actions block, name:${actionName}, key:options is empty`)
         /// test si options est de type array
         if (!(action.options instanceof Array)) throw(`In actions block, name:${actionName}, options must be of array type`)
-        action.options = await Promise.all(action.options.map((option, index) => validationActionOption(option, actionName, index, yaml, runtimeVar)))
+        action.options = await Promise.all(action.options.map((option, index) => validationActionOption(option, actionName, index, yaml)))
         let newRuntimeVar = action.options.map(option => option.name)
         /// test si les nouveaux nom de variable existent deja dans runtimeVar
         if (newRuntimeVar.includes(runtimeVar[0])) throw(`In actions block > options name:${actionName} value:${runtimeVar[0]} in name already use in arg`)
@@ -382,13 +441,19 @@ let validateYamlAction = (action, yaml) => {
         if (!action.registers) throw(`In actions block, name:${actionName}, key:registers is empty`)
         /// test si options est de type array
         if (!(action.registers instanceof Array)) throw(`In actions block, name:${actionName}, registers must be of array type`)
-        action.registers = await Promise.all(action.registers.map((register, index) => validationActionRegister(register, actionName, index, yaml, runtimeVar)))
+        action.registers = await Promise.all(action.registers.map((register, index) => validationActionRegister(register, actionName, index, yaml)))
         action.registers.map((register) => {
           /// test si les nouveaux nom de variable existent deja dans runtimeVar
           if (runtimeVar.includes(register.name)) throw(`In actions block > registers name:${actionName} value:${register} in name already use in arg or options`)
         })
         runtimeVar = [...runtimeVar, ...action.registers.map(register => register.name)]
       }
+
+      /// test si exec est vide
+      if (!action.exec) throw(`In actions block, name:${actionName}, key:exec is empty`)
+      /// test si exec est de type array
+      if (!(action.exec instanceof Array)) throw(`In actions block, name:${actionName}, registers must be of array type`)
+      action.exec = await Promise.all(action.exec.map((exec, index) => validationActionExec(exec, actionName, index, yaml, runtimeVar)))
 
       for(let keyName of keysName.filter(name => !ACTION_SUB_BLOCK.includes(name))) {
         if (DEBUG) console.log(`------ ${keyName} -------`);

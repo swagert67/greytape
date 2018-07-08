@@ -54,13 +54,25 @@ module.exports = (Program) => {
 
       {% if arg %}{# add default args #}if (arg) vars["{{ arg.name }}"] = arg {% endif %}
 
-      await run(`{{ run }}`)
+      {% for item in exec %}
+      {% if loop.first %}await run(`{{ item.cmd }}`{% if item.cwd %}, `{{ item.cwd }}`{% endif %}){% endif %}
+      {% if loop.index > 1 %}.then(() => run(`{{ item.cmd }}`{% if item.cwd %}, `{{ item.cwd }}`{% endif %})){% endif %}
+      {% endfor %}
       .then((data) => {
         printSuccess(JSON.stringify(data, undefined, 2))
       })
       .catch((error) => {
         printError(JSON.stringify(error, undefined, 2))
       })
+
+
+      // await run(`{{ run }}`)
+      // .then((data) => {
+      //   printSuccess(JSON.stringify(data, undefined, 2))
+      // })
+      // .catch((error) => {
+      //   printError(JSON.stringify(error, undefined, 2))
+      // })
     })
   })
 }

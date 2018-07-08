@@ -32,32 +32,51 @@
 #     alias: dk
 
 
-name: create nginx api
+# name: create nginx api
 #     command: api_up
 #     prefix: "{{ prefixDocker }}"
 #     run: "docker container run --name {{ containerApiName }} -p {{ port }}:80 nginx"
 #     arg:
 
+vars:
+  newDir: blucker2
+
 actions:
   - name: up compose dev
     command: up
     description: up docker compose dev
-    run: docker-compose up
+    exec:
+      - cmd: docker-compose up
   - name: down compose
     command: down
-    run: docker-compose down
+    exec:
+      - cmd: docker-compose down
   - name: ssh tty container api
     command: ssh
     prefix: api
     alias: s
-    run: docker exec -it api_container /bin/bash
+    exec:
+      - cmd: docker exec -it api_container /bin/bash
   - name: build frontend container
     command: build
     prefix: frontend
-    run: npm run build
-    # command:
-    #   - cd ./frontend
-    #   - npm run build
+    exec:
+      - cmd: npm run build
+        cwd: ./frontend
+  - name: best movie
+    command: inception
+    exec:
+      - cmd: mkdir {{ newDir }}
+      - cmd: git clone https://github.com/swagert67/greytape.git
+        cwd: ./{{ newDir }}
+      - cmd: npm i
+        cwd: ./{{ newDir }}
+      - cmd: node src/greytape.js g
+        cwd: ./{{ newDir }}/greytape
+      - cmd: node dist/stu.js
+        cwd: ./{{ newDir }}/greytape
+
+
 
 prefix:
   - name: api
