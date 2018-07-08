@@ -51,18 +51,19 @@
 
 // let str = "je suis {{ container }} est j'ai {{ truc }}";
 // let str = "je suis {{ container }}";
-let str = "je suis";
+// let str = "je suis";
+//
+// let matchesVariables = (value) => {
+//   const regex = /{{\s*(\S*)\s*}}/gm;
+//   let matches = []
+//   while ((match = regex.exec(value)) !== null) {
+//     matches.push(match)
+//     if (match.index === regex.lastIndex) regex.lastIndex++
+//   }
+//   return matches.length ? matches : null
+// }
+//
+// let test = matchesVariables(str)
+//
 
-let matchesVariables = (value) => {
-  const regex = /{{\s*(\S*)\s*}}/gm;
-  let matches = []
-  while ((match = regex.exec(value)) !== null) {
-    matches.push(match)
-    if (match.index === regex.lastIndex) regex.lastIndex++
-  }
-  return matches.length ? matches : null
-}
-
-let test = matchesVariables(str)
-
-console.log(test)
+console.log(process.cwd());

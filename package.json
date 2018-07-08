@@ -1,13 +1,27 @@
 {
   "name": "greytape-demo",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "description": "",
-  "main": "cli.js",
+  "main": "./src/greytape.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/swagert67/greytape"
+  },
+  "keywords": [
+    "cli",
+    "generator",
+    "tool",
+    "orchestration",
+    "command"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "boblee",
+  "license": "BSD-3-Clause",
+  "engines": {
+    "node": ">=7.10.1"
+  },
   "dependencies": {
     "chalk": "^2.4.1",
     "commander": "^2.16.0",
@@ -16,5 +30,11 @@
     "nunjucks": "^3.1.3",
     "read-yaml": "^1.1.0",
     "yam": "0.0.24"
+  },
+  "bugs": {
+    "email": "herve@start-to-up.com"
+  },
+  "bin": {
+    "greytape": "./src/greytape.js"
   }
 }

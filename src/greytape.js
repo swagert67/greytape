@@ -8,15 +8,16 @@ Program
   .command('generate')
   .alias('g')
   .description('generate new cli')
+  .arguments("<cli-name>", "cli name in bin")
   .option('-f, --force', 'force if dist already exist')
-  .option('-c, --config <config>', 'config file path')
+  .option('-y, --yaml <config>', 'config file path')
   .action((arg, cmd) => {
     if (!cmd) cmd = arg
     let opts = {
       force: cmd.force,
       config: cmd.config
     }
-    generate(opts)
+    generate(arg, opts)
     .then(printSuccess)
     .catch(printError)
   })
@@ -29,13 +30,6 @@ Program
     printSuccess("success publish")
   })
 
-Program
-  .command('config')
-  .alias('c')
-  .description('config greytape')
-  .action(function (dir, cmd) {
-    printSuccess("success config")
-  })
 
 Program.on('command:*', function () {
   printError(`Invalid command: ${Program.args.join(' ')}`)
