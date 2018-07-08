@@ -11,7 +11,7 @@ const REGEX_VARIABLE = /{{\s*(\S*)\s*}}/g;
 // const REGEX_VARIABLE = "{{\s*(\S*)\s*}}"
 
 const REGEX_EVAL = /\${(.*?)}/ // /^`(.*)`$/
-const DEBUG = true
+const DEBUG = false
 const VALIDATION_CONFIG = {
   prefix: {
     require: ["name"],
@@ -530,6 +530,7 @@ let validateYaml = (yaml) => {
 
 let renderTemplate = (templateName, dist, variables, extention="js") => {
   return new Promise((resolve, reject) => {
+    console.log(`${templateName}.${extention}.j2`)
     Fs.readFile(Path.resolve(TEMPLATE_PATH, `${templateName}.${extention}.j2`), 'utf8', (err, data) => {
       if (err) return reject(err)
       Fs.writeFile(`${dist}.${extention}`, ENV_NUNJUCKS.renderString(data, variables), (err) => {

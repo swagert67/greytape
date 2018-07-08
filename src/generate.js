@@ -41,7 +41,6 @@ let generate = (cliName, opts) => {
 
           // render each command file
           actions.map(async(action) => {
-            // console.log(`create file ${action.command}`);
             await renderTemplate("command", Path.resolve(DIST_PATH, prefix.name, action.command), action)
           })
 
@@ -81,6 +80,9 @@ let generate = (cliName, opts) => {
 
       // create variable file
       await renderTemplate("config", Path.resolve(DIST_PATH, 'config'), {vars: yaml.vars})
+
+      // create package json
+      await renderTemplate("package", Path.resolve(DIST_PATH, 'package'), { cliName }, "json")
 
       resolve("generate success")
     } catch (error) {
