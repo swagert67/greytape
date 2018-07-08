@@ -1,0 +1,67 @@
+# vars:
+#   common: demo2
+#   containerApiName: "{{ API_NAME }}_{{ COMMON_NAME }}"
+#   containerWebName: "{{ WEB_NAME }}_{{ common }}"
+#   prefixDocker: docker
+#
+# actions:
+#   - name: create nginx api
+#     command: api_up
+#     prefix: "{{ prefixDocker }}"
+#     run: "docker container run --name {{ containerApiName }} -p {{ port }}:80 nginx"
+#     arg:
+#       name: command
+#       description: command exec by container
+#       default: ping google.com
+#     options:
+#       - name: port
+#         alias: p
+#         value: "9090"
+#         description: port extern
+#     registers:
+#       - name: "user"
+#         command: "printenv USER"
+#   - name: remove nginx api
+#     command: api_delete
+#     prefix: "{{ prefixDocker }}"
+#     run: "docker container rm -f {{ containerApiName }}"
+#
+# prefix:
+#   - name: "{{ prefixDocker }}"
+#     description: docker action
+#     alias: dk
+
+
+name: create nginx api
+#     command: api_up
+#     prefix: "{{ prefixDocker }}"
+#     run: "docker container run --name {{ containerApiName }} -p {{ port }}:80 nginx"
+#     arg:
+
+actions:
+  - name: up compose dev
+    command: up
+    description: up docker compose dev
+    run: docker-compose up
+  - name: down compose
+    command: down
+    run: docker-compose down
+  - name: ssh tty container api
+    command: ssh
+    prefix: api
+    alias: s
+    run: docker exec -it api_container /bin/bash
+  - name: build frontend container
+    command: build
+    prefix: frontend
+    run: npm run build
+    # command:
+    #   - cd ./frontend
+    #   - npm run build
+
+prefix:
+  - name: api
+    description: action on api container
+    alias: a
+  - name: frontend
+    description: action on frontent container

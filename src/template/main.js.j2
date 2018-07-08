@@ -1,10 +1,8 @@
 #!/usr/bin/env node
 let Program = require('commander')
-let Actions = require('./actions')
+{% if actionsWithoutPrifix %}let Actions = require('./actions'){% endif %}
 
-for (let action in Actions){
-  Actions[action](Program)
-}
+{% if actionsWithoutPrifix %}for (let action in Actions){ Actions[action](Program) }{% endif %}
 
 Program
 .description('CLI for greytape')

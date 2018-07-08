@@ -1,0 +1,66 @@
+const { run, printSuccess, printError, register } = require('../libs')
+const Config = require('../config')
+
+module.exports = (Program) => {
+  return new Promise((resolve, reject) => {
+    Program
+    .command('{{ command }}')
+    {% for opt in options %}
+    .option('-{{ opt.alias }}, --{{ opt.name }} {% if opt.value %}[{% else %}<{% endif %}{{ opt.name }}{% if opt.value %}]{% else %}>{% endif %}', '{{ opt.description }}')
+    {% endfor %}
+    {% if alias %}.alias('{{ alias }}'){% endif %}
+    {% if description %}.description('{{ description }}'){% endif %}
+    {% if arg %}.arguments('{% if arg.default %}[{% else %}<{% endif %}{{ arg.name }}{% if arg.default %}]{% else %}>{% endif %}', '{{ arg.description }}'){% endif %}
+    .action(async (arg, cmd) => {
+      /*
+        si il y a un argument non optional, arg == valeur et cmd est le detail de la command avec les options
+        si il y a un argument optional, arg == valeur || undefined et cmd est le detail de la command avec les options
+        si il n'y a pas argument arg == est le detail de la command avec les options et cmd undefined
+      */
+      if (cmd == undefined) {
+        cmd = arg
+        arg = undefined
+      }
+
+      // if (cmd.port) {
+      //   console.log("use port option")
+      // } else {
+      //   console.log("use default port")
+      // }
+      //
+      // if (arg) {
+      //   console.log("use new arg")
+      // } else {
+      //   console.log("use default arg")
+      // }
+
+      let vars = Object.assign({}, Config)
+
+      // ENV FUTURE
+
+      {% if registers %}{# add register #}{% for register in registers %}
+      vars["{{ register.name }}"] = await register("{{ register.command }}", "{{ register.cwd }}")
+      {% endfor %}{% endif %}
+
+      {% if options %}{# add default options #}{% for opt in options %}
+      vars["{{ opt.name }}"] = "{{ opt.value }}"
+      {% endfor %}{% endif %}
+
+      {% if arg and arg.default %}{# add default args #}vars["{{ arg.name }}"] = "{{ arg.default }}"{% endif %}
+
+      {% if options %}{# add option #}{% for opt in options %}
+      if (cmd.{{opt.name}}) vars["{{ opt.name }}"] = cmd.{{opt.name}}
+      {% endfor %}{% endif %}
+
+      {% if arg %}{# add default args #}if (arg) vars["{{ arg.name }}"] = arg {% endif %}
+
+      await run(`{{ run }}`)
+      .then((data) => {
+        printSuccess(JSON.stringify(data, undefined, 2))
+      })
+      .catch((error) => {
+        printError(JSON.stringify(error, undefined, 2))
+      })
+    })
+  })
+}

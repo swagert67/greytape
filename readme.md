@@ -1,11 +1,7 @@
-# Generate
+# GREYTAPE
 
-```bash
-  node generate.js
-```
+## Roadmap
 
-# Use
-
-```bash
-  node dist/greytape.js
-```
+* change run to array of run
+* vars add array or object
+* add type boolean and number
