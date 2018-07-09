@@ -4,17 +4,14 @@ const Env = require('dotenv').config({ path: Path.resolve(process.cwd(), ".env")
 const { mkdir, deleteContentDirectory } = require('./fs-stu')
 const { printWarning, readYaml, renderTemplate, validateYaml } = require('./libs')
 
-// add all const in futur preferences file
-const YAML_FILENAME = "greytape.yml"
-
 let generate = (cliName, opts) => {
   const DIST_PATH = Path.resolve(process.cwd(), `cli-${cliName}`)
 
   return new Promise(async(resolve, reject) => {
     try {
       // get config in yaml file
-      let yaml = await readYaml(Path.resolve(process.cwd(), opts.config || YAML_FILENAME))
-      if (yaml == "missing") return reject(`Error name yaml file : ${opts.config || YAML_FILENAME}`)
+      let yaml = await readYaml(Path.resolve(process.cwd(), opts.config || "greytape.yml" || "greytape.yaml"))
+      if (yaml == "missing") return reject(`Error name yaml file : ${opts.config || "greytape.yml" || "greytape.yaml"}`)
 
       yaml = await validateYaml(yaml)
 

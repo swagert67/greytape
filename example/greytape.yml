@@ -53,7 +53,8 @@ prefix:
 #   - name: create nginx api
 #     command: api_up
 #     prefix: "{{ prefixDocker }}"
-#     run: "docker container run --name {{ containerApiName }} -p {{ port }}:80 nginx"
+#     exec:
+#       - cmd: "docker container run --name {{ containerApiName }} -p {{ port }}:80 {{ tty }} nginx"
 #     arg:
 #       name: command
 #       description: command exec by container
@@ -69,7 +70,8 @@ prefix:
 #   - name: remove nginx api
 #     command: api_delete
 #     prefix: "{{ prefixDocker }}"
-#     run: "docker container rm -f {{ containerApiName }}"
+#     exec:
+#       - cmd: "docker container rm -f {{ containerApiName }}"
 #
 # prefix:
 #   - name: "{{ prefixDocker }}"

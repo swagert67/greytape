@@ -448,11 +448,11 @@ let validateYamlAction = (action, yaml) => {
         })
         runtimeVar = [...runtimeVar, ...action.registers.map(register => register.name)]
       }
-
+      
       /// test si exec est vide
       if (!action.exec) throw(`In actions block, name:${actionName}, key:exec is empty`)
       /// test si exec est de type array
-      if (!(action.exec instanceof Array)) throw(`In actions block, name:${actionName}, registers must be of array type`)
+      if (!(action.exec instanceof Array)) throw(`In actions block, name:${actionName}, exec must be of array type`)
       action.exec = await Promise.all(action.exec.map((exec, index) => validationActionExec(exec, actionName, index, yaml, runtimeVar)))
 
       for(let keyName of keysName.filter(name => !ACTION_SUB_BLOCK.includes(name))) {
@@ -530,7 +530,6 @@ let validateYaml = (yaml) => {
 
 let renderTemplate = (templateName, dist, variables, extention="js") => {
   return new Promise((resolve, reject) => {
-    console.log(`${templateName}.${extention}.j2`)
     Fs.readFile(Path.resolve(TEMPLATE_PATH, `${templateName}.${extention}.j2`), 'utf8', (err, data) => {
       if (err) return reject(err)
       Fs.writeFile(`${dist}.${extention}`, ENV_NUNJUCKS.renderString(data, variables), (err) => {

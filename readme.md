@@ -2,10 +2,17 @@
 
 ## demo
 
-1. `npm i`
-2. `node src/greytape.js` : show greytape cli
-3. `node src/greytape.js g` : generate client cli
-4. `node dist/stu.js` : show client cli
+1. Install greytape cli `npm i -g greytape-demo`
+2. Go to the desktop folder: `cd ~/Desktop`
+3. Create new directory with demo name: `mkdir demo && cd demo`
+4. Create yaml file: `touch greytape.yml`
+3. Add config content in yaml file (find yaml file example in github)
+4. Generate your cli: `greytape g <cli-name>`
+5. Test your cli
+  1. Go to the folder of your cli: `cd cli-<cli-name>`
+  2. Install dependencies: `npm i`
+  3. Show command list: `node <cli-name>.js`
+
 
 ## config
 
@@ -44,6 +51,32 @@ prefix: # OPTIONAL
 
 ## todo
 
-* change run to array of run
 * vars add array or object
-* add type boolean and number
+* add type boolean, number and ...
+
+
+* option without value (-i)
+```yaml
+- name: tty
+  alias: i
+  description: tty interaction
+  value: -it
+  default: -it
+```
+
+in code
+```javascript
+for(option of options) {
+  if (opts[option.name]) {
+    if (option.value) {
+      vars[option.name] = option.value
+    } else {
+      vars[option.name] = opts[option.name]
+    }
+  } else {
+    if (option.default) {
+      vars[option.name] = option.default
+    }
+  }
+}
+```
